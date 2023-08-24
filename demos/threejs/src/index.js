@@ -154,7 +154,7 @@ function initControllers() {
 
     stick1.position.z = -2.5;
     stickHolder1.add(stick1);
-    controller1.add(stickHolder1);
+    //controller1.add(stickHolder1);
 
 
     const stickHolder2 = new THREE.Group();
@@ -187,11 +187,9 @@ function initControllers() {
     const stick2 = new THREE.Mesh(stickGeometry2, stickMaterial2);
     stick2.position.z = -2.5;
     stickHolder2.add(stick2);
-    controller2.add(stickHolder2);
+    //controller2.add(stickHolder2);
 
 }
-
-
 
 
 
@@ -209,6 +207,11 @@ function onXRSessionEnd() {
         renderer.xr.end();
     }
 }
+
+let canvas, ctx, texture
+// Assuming poses is the array of pose names
+const poses = ['fist','relax', 'flat', 'point', 'shaka', 'vulcan', 'horns'];
+
 
 function init() {
 
@@ -260,6 +263,21 @@ function init() {
     light.shadow.mapSize.set(4096, 4096);
     scene.add(light);
 
+    // GUI
+    canvas = document.createElement('canvas');
+    ctx = canvas.getContext('2d');
+
+    canvas.width = 512; // Example size. Adjust as necessary.
+    canvas.height = 512;
+
+    texture = new THREE.CanvasTexture(canvas);
+    
+    const material = new THREE.MeshBasicMaterial({ map: texture });
+    const tablePlane = new THREE.Mesh(new THREE.PlaneGeometry(5, 5), material); // Adjust size as needed
+    tablePlane.position.set(0,1,-4) 
+    scene.add(tablePlane);
+
+
 
     initControllers();
 
@@ -275,23 +293,87 @@ function onWindowResize() {
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
+  function updateGUI(mostProbablePoseLeft, mostProbablePoseRight) {
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+
+      // Set table headers
+      ctx.font = "20px Arial";
+      ctx.fillStyle = "#D147A3";
+      // Improved text rendering
+      ctx.textBaseline = 'middle';
+      ctx.textAlign = 'left';
+
+      ctx.fillText("Left Hand", 50, 40);
+
+      ctx.fillText("Right Hand", 300, 40);
+      ctx.fillStyle = "white";
+
+      // Iterate over poses and draw them for both hands
+      for(let i = 0; i < poses.length; i++) {
+          
+          const posY = 100 + i * 40; // 60 is a starting Y, and 40 is spacing between rows
+          
+          if(poses[i] === mostProbablePoseLeft) {
+              ctx.fillStyle = "#D147A3";
+              ctx.fillRect(10, posY - 20, 230, 40); // Highlight background
+          }
+          
+          ctx.fillStyle = "white";
+          ctx.fillText(poses[i], 50, posY);
+
+          if(poses[i] === mostProbablePoseRight) {
+              ctx.fillStyle = "#D147A3";
+              ctx.fillRect(260, posY - 20, 230, 40); // Highlight background
+          }
+          
+          ctx.fillStyle = "white";
+          ctx.fillText(poses[i], 300, posY);
+      }
+
+      texture.needsUpdate = true; // This is important to update the texture in Three.js
+  }
+
+
+
+let mostProbablePoseLeft = '';
+let mostProbablePoseRight = '';
+
 function poseDetected(posesAndDistances) {
-    console.log("poseDetected:", posesAndDistances)
+    const distances = posesAndDistances.distances;
+
+    let minDistancePose = distances[0];
+    distances.forEach(pose => {
+        if (pose[1] < minDistancePose[1]) {
+            minDistancePose = pose;
+        }
+    });
+
+    if (posesAndDistances.handedness === 'left') {
+        mostProbablePoseLeft = minDistancePose[0];
+    } else if (posesAndDistances.handedness === 'right') {
+        mostProbablePoseRight = minDistancePose[0];
+    }
+
+    updateGUI(mostProbablePoseLeft, mostProbablePoseRight);
 }
 
+
+
+
 function render(timeStamp, xrFrame) {
+
     controls.update();
-    const hand1 = renderer.xr.getHand(0);
-    const hand2 = renderer.xr.getController(1);
 
 
-    if (xrFrame && xrRefSpace && hand1 && hand2) {
+    if (xrFrame && xrRefSpace) {
 
-    let hands = xrFrame.session.inputSources.filter(inputSource => !!inputSource.hand)
+      const inputSourcesArray = [...xrFrame.session.inputSources];
+      let hands = inputSourcesArray.filter(inputSource => !!inputSource.hand);
+
+      handyWorkUpdate(hands, xrRefSpace, xrFrame, poseDetected);        
+
     //console.log("test", hands)
-
-
-        handyWorkUpdate([hands[0], hands[1]], xrRefSpace, xrFrame, poseDetected);
     }
     renderer.render(scene, camera);
 }

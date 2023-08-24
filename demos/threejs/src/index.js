@@ -14,21 +14,21 @@ import {
 import fistHandpose from 'handy-work/poses/fist.handpose';
 import relaxHandpose from 'handy-work/poses/relax.handpose';
 import flatHandpose from 'handy-work/poses/flat.handpose';
-// import pointHandpose from 'handy-work/poses/point.handpose';
-// import shakaHandpose from 'handy-work/poses/shaka.handpose';
-// import vulcanHandpose from 'handy-work/poses/vulcan.handpose';
-// import hornsHandpose from 'handy-work/poses/horns.handpose';
+import pointHandpose from 'handy-work/poses/point.handpose';
+import shakaHandpose from 'handy-work/poses/shaka.handpose';
+import vulcanHandpose from 'handy-work/poses/vulcan.handpose';
+import hornsHandpose from 'handy-work/poses/horns.handpose';
 
 loadPose('fist', fistHandpose);
 loadPose('relax', relaxHandpose);
 loadPose('flat', flatHandpose);
-// loadPose('point', pointHandpose);
-// loadPose('shaka', shakaHandpose);
-// loadPose('vulcan', vulcanHandpose);
-// loadPose('horns', hornsHandpose);
+loadPose('point', pointHandpose);
+loadPose('shaka', shakaHandpose);
+loadPose('vulcan', vulcanHandpose);
+loadPose('horns', hornsHandpose);
 
 
-let camera, scene, renderer, cube;
+let camera, scene, renderer;
 let controls;
 
 let xrRefSpace;
@@ -280,7 +280,7 @@ function poseDetected(posesAndDistances) {
 
 function render(timeStamp, xrFrame) {
     controls.update();
-    const hand1 = renderer.xr.getController(0);
+    const hand1 = renderer.xr.getHand(0);
     const hand2 = renderer.xr.getController(1);
     if (xrFrame && xrRefSpace && hand1 && hand2) {
         handyWorkUpdate([hand1, hand2], xrRefSpace, xrFrame, poseDetected);

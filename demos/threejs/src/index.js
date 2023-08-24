@@ -52,6 +52,7 @@ function initControllers() {
     // controllers
     controller1 = renderer.xr.getController(0);
     scene.add(controller1);
+
     controller2 = renderer.xr.getController(1);
     scene.add(controller2);
 
@@ -282,8 +283,15 @@ function render(timeStamp, xrFrame) {
     controls.update();
     const hand1 = renderer.xr.getHand(0);
     const hand2 = renderer.xr.getController(1);
+
+
     if (xrFrame && xrRefSpace && hand1 && hand2) {
-        handyWorkUpdate([hand1, hand2], xrRefSpace, xrFrame, poseDetected);
+
+    let hands = xrFrame.session.inputSources.filter(inputSource => !!inputSource.hand)
+    //console.log("test", hands)
+
+
+        handyWorkUpdate([hands[0], hands[1]], xrRefSpace, xrFrame, poseDetected);
     }
     renderer.render(scene, camera);
 }

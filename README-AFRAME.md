@@ -15,21 +15,6 @@ The following are exposed on the component itself so you can hook into the libra
 Use the following properties to customise the component
 
 <!--SCHEMA-->
-Vector3
-Vector3
-Quaternion
-Quaternion
-Quaternion
-| Property         | Type   | Description                                                                                                                                                                             | Default                                                                                          |
-| :--------------- | :----- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------- |
-| renderGamepad    | string | Whether to render a gamepad model when it's not doing hand tracking, right, none and left are the names of controller handedness, any is all of them, and never is to not draw gamepads | "any"                                                                                            |
-| left             | model  | URL for left controller                                                                                                                                                                 | "https://cdn.jsdelivr.net/npm/@webxr-input-profiles/assets/dist/profiles/generic-hand/left.glb"  |
-| right            | model  | URL for right controller                                                                                                                                                                | "https://cdn.jsdelivr.net/npm/@webxr-input-profiles/assets/dist/profiles/generic-hand/right.glb" |
-| materialOverride | string | Which hand to use the `material` component for                                                                                                                                          | "both"                                                                                           |
-| fuseVShort       | number | Time for a pose to trigger a pose event (ms)                                                                                                                                            | 48                                                                                               |
-| fuseShort        | number | Time for a pose to trigger a pose_fuseShort event (ms)                                                                                                                                  | 480                                                                                              |
-| fuseLong         | number | Time for a pose to trigger a pose_fuseLong event (ms)                                                                                                                                   | 1440                                                                                             |
-
 <!--SCHEMA_END-->
 
 Child entities with the `data-left`, `data-right` or `data-none` properties have their position and 
@@ -188,71 +173,4 @@ In `magnet-helpers.js` you can find a few helpful components for dealing with th
 
 
 <!--SCHEMA2-->
-### linear-constraint
-
-linear-constraint is designed to place the element it's attached to 
-place elements as close as possible to the target element whilst being restrained along a line
-defined by the `axis`, between the `min` and `max` on either side of the original position
-of the object when this component is first run.
-
-This is useful for creating magnetic lines. Put linear-constraint on a magnetic element and set it's target
-to the **non-magnet** version of the hand element with the data-magnet property. i.e. the same part but with `data-no-magnet`
-
-Vector3
-Vector3
-| Property                  | Type        | Description                                                                        | Default              |
-| :------------------------ | :---------- | :--------------------------------------------------------------------------------- | :------------------- |
-| axis                      | vec3        | Axis upon which the element is constrained, does not need to be normalized.        | {"x":0,"y":0,"z":-1} |
-| max                       | number      | How far can it travel along the axis                                               | Infinity             |
-| min                       | number      | How far can it travel opposite to the axis                                         | -Infinity            |
-| radius                    | number      | Outside this distance it will not work                                             | Infinity             |
-| useFixedValueIfOutOfRange | boolean     | Should the object remain at a fixed position if out of the radius.                 | false                |
-| valueIfOutOfRange         | number      | Value the object should be set to if out of the radius                             | 0                    |
-| step                      | number      | Steps it should take from the origin.                                              | 0                    |
-| target                    | selectorAll | Element it should try to follow                                                    |                      |
-| part                      | string      | If applied to a 3D model this is the name of the part that should be used instead. | ""                   |
-| enabled                   | boolean     | Whether it should currently run or not                                             | true                 |
-| upEventName               | string      | Name of event to trigger when t is increasing                                      | ""                   |
-| upEventThreshold          | number      | Threshold to trigger up event                                                      | 0                    |
-| downEventName             | string      | Name of event to trigger when t is decreasing                                      | ""                   |
-| downEventThreshold        | number      | Threshold to trigger up event                                                      | 0                    |
-
-### attach-to-model
-
-Each frame attach-to-model will move an object to the same position as part of the 3D model of it's parent element.
-
-This is useful for attaching magnetic elements to moving elements of a 3D model so it can be grabbed in different ways.
-
-| Type   | Description            | Default |
-| :----- | :--------------------- | :------ |
-| string | Name of part to follow | ""      |
-
-### grab-magnet-target
-
-This should be added to the hand elements with the `data-magnet`.
-
-When one of the `startEvents` events is fired it will start a grab action where it will
-consider itself grabbing whatever magnetic item it is currently being attracted to and fires the "grabbed" event
-on the object.
-
-If the object has `data-pick-up` set then the object will be reparented to the hand element that fired
-the grab event. The "pickup" event will be fired on the object.
-
-If the object has `data-pick-up="parent"` set then the object's parent will be reparented to the hand element that fired
-the grab event. The "pickup" event will be fired on the object's parent.
-
-When either the release event is fired or the object stops being magnet target then it will consider itself released.
-it will reparent objects back to where they were originally and fire the "putdown" event on what was held if it had been picked up.
-If the held object has `data-reset-transform` set then it will also restore it's oriingal position. Otherwise the world position and rotation of the object will remain the same.
-
-Finally the "released" event is fired on whatever was being held.
-
-Quaternion
-Vector3
-| Property    | Type     | Description                                                               | Default |
-| :---------- | :------- | :------------------------------------------------------------------------ | :------ |
-| startEvents | array    | Event to start grabbing                                                   |         |
-| stopEvents  | array    | Event to stop grabbing                                                    |         |
-| noMagnetEl  | selector | The version of the grip with no magnet providing it helps physics things. |         |
-
 <!--SCHEMA2_END-->

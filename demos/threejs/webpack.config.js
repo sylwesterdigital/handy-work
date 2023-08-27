@@ -47,11 +47,11 @@ module.exports = {
       title: 'Three.js with Webpack',
       template: './src/index.html',
     }),
-/*    new CopyPlugin({
+    new CopyPlugin({
         patterns: [
             { from: 'src/models', to: 'models' }
         ],
-    }),*/    
+    }),    
   ],
   devServer: {
       static: path.join(__dirname, 'dist'),
